@@ -33,7 +33,7 @@ type CmdArgs struct {
 }
 
 func (CmdArgs) Version() string {
-	return "govendor 0.1.0"
+	return "govendor 0.1.1"
 }
 
 var args CmdArgs
