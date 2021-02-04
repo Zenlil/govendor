@@ -26,7 +26,7 @@ const (
 	dsSubvendored
 )
 
-func deps(name string, tidy bool, dump bool) {
+func deps(name string, tidy bool, noRemove bool, dump bool) {
 	v := load(name, true, nil)
 	if v == nil {
 		return
@@ -82,17 +82,22 @@ func deps(name string, tidy bool, dump bool) {
 	for _, name := range allNames {
 		switch current[name] {
 		case dsNotUsed:
-			fmt.Printf("?????? %s\n", name)
+			fmt.Printf("??????  %s\n", name)
 		case dsAdd:
-			fmt.Printf("ADD    %s\n", name)
+			fmt.Printf("ADD     %s\n", name)
 		case dsUpdate:
-			fmt.Printf("UPDATE %s\n", name)
+			fmt.Printf("UPDATE  %s\n", name)
 		case dsDelete:
-			fmt.Printf("DELETE %s\n", name)
+			if noRemove {
+				fmt.Printf("unused? %s\n", name)
+
+			} else {
+				fmt.Printf("DELETE  %s\n", name)
+			}
 		case dsVendored:
-			fmt.Printf("ok     %s\n", name)
+			fmt.Printf("ok      %s\n", name)
 		case dsSubvendored:
-			fmt.Printf("(impl) %s\n", name)
+			fmt.Printf("(impl)  %s\n", name)
 		}
 	}
 	var empty = false
@@ -108,7 +113,7 @@ func deps(name string, tidy bool, dump bool) {
 			v.Update()
 		}
 
-		if len(toRemove) > 0 {
+		if len(toRemove) > 0 && !noRemove {
 			if !empty {
 				fmt.Println()
 			}

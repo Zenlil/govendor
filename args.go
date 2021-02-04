@@ -23,6 +23,11 @@ type DepsArgs struct {
 	Dump bool `arg:"--dump" help:"creates a 'deps.json' of relevant packages"`
 }
 
+type TidyArgs struct {
+	Dump     bool `arg:"--dump" help:"creates a 'deps.json' of relevant packages"`
+	NoRemove bool `arg:"--no-remove,--noremove" help:"dont remove any unused packages"`
+}
+
 type CmdArgs struct {
 	Source   string           `arg:"-s,--source" help:"source location of .go-files" default:"."`
 	Filename string           `arg:"-f,--filename" help:"the name and location of the vendor.json file" default:"vendor/vendor.json" placeholder:"VENDOR_JSON"`
@@ -35,11 +40,11 @@ type CmdArgs struct {
 	Get      *AddOrDeleteArgs `arg:"subcommand:get" help:"add and update package(s) to vendoring"`
 	Update   *PackageArgs     `arg:"subcommand:update" help:"update package(s) from GOPATH"`
 	Deps     *DepsArgs        `arg:"subcommand:deps" help:"find dependent packages"`
-	Tidy     *DepsArgs        `arg:"subcommand:tidy" help:"add, update and removes according to 'deps'"`
+	Tidy     *TidyArgs        `arg:"subcommand:tidy" help:"add, update and removes according to 'deps'"`
 }
 
 func (CmdArgs) Version() string {
-	return "govendor 0.2.0"
+	return "govendor 0.2.1"
 }
 
 var args CmdArgs

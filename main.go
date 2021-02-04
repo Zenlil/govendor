@@ -43,9 +43,9 @@ func main() {
 		get(args.Filename, args.Get.Names)
 
 	case args.Deps != nil:
-		deps(args.Filename, false, args.Deps.Dump)
+		deps(args.Filename, false, false, args.Deps.Dump)
 
 	case args.Tidy != nil:
-		deps(args.Filename, true, args.Tidy.Dump)
+		deps(args.Filename, true, args.Tidy.NoRemove, args.Tidy.Dump)
 	}
 }
