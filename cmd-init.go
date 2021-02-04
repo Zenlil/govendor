@@ -23,7 +23,7 @@ func initVendor(name string) {
 	if args.DryRun {
 		fmt.Printf("dry-run: would create '%s' with package = '%s'\n", name, v.RootPath)
 	} else {
-		os.MkdirAll(filepath.Dir(name), 0)
+		os.MkdirAll(filepath.Dir(name), defaultAccess)
 		v.save()
 	}
 }

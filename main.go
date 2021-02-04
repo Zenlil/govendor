@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+const (
+	defaultAccess = 0755
+)
+
 func main() {
 
 	if fi, err := os.Stat(args.GoPath); err != nil || !fi.IsDir() {

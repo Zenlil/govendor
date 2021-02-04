@@ -98,7 +98,7 @@ func (p *Package) scanToCopy(target string) bool {
 		return false
 	}
 
-	err := os.MkdirAll(p.target, 0)
+	err := os.MkdirAll(p.target, defaultAccess)
 	if err != nil {
 		fmt.Printf("--> target is not available: %s\n", err)
 		return false
@@ -157,7 +157,7 @@ func copyFile(name, from, to string) (int64, error) {
 	target := filepath.Join(to, name)
 
 	targetDir := filepath.Dir(target)
-	_ = os.MkdirAll(targetDir, 0)
+	_ = os.MkdirAll(targetDir, defaultAccess)
 
 	targetF, err := os.Create(target)
 	if err != nil {
