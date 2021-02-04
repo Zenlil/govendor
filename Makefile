@@ -16,3 +16,6 @@ add1:
 
 delete1:
 	./govendor -f example/vendor1.json delete GoShared/types foo --dryrun
+
+deps1:
+	./govendor -f example/vendor1.json deps

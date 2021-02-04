@@ -91,7 +91,6 @@ func progress(w int, n, tot int64) {
 
 func (p *Package) scanToCopy(target string) bool {
 	p.target = path.Join(target, p.Path)
-	//fmt.Printf("\ncopy '%s' -> '%s'\n", p.Path, target)
 
 	p.sourcefolder = locate(p.Path)
 	if p.sourcefolder == "" {
@@ -110,7 +109,6 @@ func (p *Package) scanToCopy(target string) bool {
 	for _, size := range p.toCopy {
 		p.sumSize += size
 	}
-	//fmt.Printf("%d files to copy (%d bytes)...%s\n", len(p.toCopy), p.sumSize, clearEOL)
 	return true
 }
 
@@ -146,13 +144,10 @@ func walkCopyFile(path string, fi os.FileInfo, _ error, realSource, source strin
 
 	if fi.IsDir() {
 		if strings.HasPrefix(relName, ".git") {
-			// fmt.Printf("ignoring git-repo %s%s\n", relName, clearEOL)
 			return filepath.SkipDir
 		}
-		// fmt.Printf("copying folder %s%s\n", relName, clearEOL)
 	} else {
 		copied[relName] = fi.Size()
-		// fmt.Printf("%s%s\r", relName, clearEOL)
 	}
 	return nil
 }
@@ -181,7 +176,6 @@ func copyFile(name, from, to string) (int64, error) {
 
 func (p *Package) scanToDelete() {
 	p.toDelete = make(map[string]bool)
-	//findFilesToCopy(, p.sourcefolder, p.target, p.toCopy)
 
 	realTarget := fmt.Sprintf("%s%c", p.target, filepath.Separator)
 

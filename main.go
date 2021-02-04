@@ -38,7 +38,10 @@ func main() {
 	case args.Get != nil:
 		get(args.Filename, args.Get.Names)
 
-		// case args.Check != nil:
-		// 	check(args.Filename, args.Check.Names)
+	case args.Deps != nil:
+		deps(args.Filename, false, args.Deps.Dump)
+
+	case args.Tidy != nil:
+		deps(args.Filename, true, args.Tidy.Dump)
 	}
 }

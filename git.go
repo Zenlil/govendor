@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os/exec"
 	"strings"
 	"time"
 )
@@ -11,39 +9,22 @@ import (
 func (p *Package) updateGit() bool {
 	var head string
 
-	git1 := exec.Command("git", "rev-parse", "HEAD")
-	git1.Dir = p.sourcefolder
-
-	out1, _ := git1.StdoutPipe()
-	_ = git1.Start()
-	_ = git1.Wait
-
-	scan := bufio.NewScanner(out1)
-	if scan.Scan() {
-		head = scan.Text()
-	}
-
-	git := exec.Command("git", "rev-list", "--format=format:'%ci'", "--max-count=1", head)
-	git.Dir = p.sourcefolder
-
-	out, err := git.StdoutPipe()
+	lines, err := execProc(p.sourcefolder, "git", "rev-parse", "HEAD")
 	if err != nil {
 		fmt.Printf("error updating git-info for %s: %s\n", p.Path, err)
 		return false
 	}
-	defer out.Close()
+	if len(lines) > 0 {
+		head = lines[0]
+	}
 
-	outScanner := bufio.NewScanner(out)
+	lines, err = execProc(p.sourcefolder, "git", "rev-list", "--format=format:'%ci'", "--max-count=1", head)
+	if err != nil {
+		fmt.Printf("error updating git-info for %s: %s\n", p.Path, err)
+		return false
+	}
 
-	go func() {
-		err = git.Run()
-		if err != nil {
-			fmt.Printf("error updating git-info for %s: %s\n", p.Path, err)
-		}
-	}()
-
-	for outScanner.Scan() {
-		line := outScanner.Text()
+	for _, line := range lines {
 		if strings.HasPrefix(line, "commit ") {
 			p.Revision = strings.TrimPrefix(line, "commit ")
 		} else {

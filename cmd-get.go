@@ -6,6 +6,6 @@ func get(name string, filter []string) {
 		return
 	}
 
-	v.AddNames()
+	v.AddNames(true)
 	v.Update()
 }

@@ -8,13 +8,15 @@ func add(name string, names []string) {
 		return
 	}
 
-	v.AddNames()
+	v.AddNames(true)
 }
 
-func (v *Vendor) AddNames() {
-	for _, p := range v.Packages {
-		if p.filtered {
-			fmt.Printf("%s is already vendored\n", p.Path)
+func (v *Vendor) AddNames(showNotice bool) {
+	if !showNotice {
+		for _, p := range v.Packages {
+			if p.filtered {
+				fmt.Printf("%s is already vendored\n", p.Path)
+			}
 		}
 	}
 

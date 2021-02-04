@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -53,14 +54,23 @@ func load(name string, logErr bool, filter []string) *Vendor {
 		return nil
 	}
 
+	v.Sort()
+
 	//var any = false
 	for _, name := range filter {
 		var used bool = false
 		//any = true
 		for _, p := range v.Packages {
-			if strings.EqualFold(name, p.Path) {
-				used = true
-				p.filtered = true
+			if len(name) > len(p.Path) {
+				if strings.EqualFold(name[0:len(p.Path)], p.Path) {
+					used = true
+					p.filtered = true
+				}
+			} else {
+				if strings.EqualFold(name, p.Path) {
+					used = true
+					p.filtered = true
+				}
 			}
 		}
 		if !used {
@@ -79,6 +89,9 @@ func load(name string, logErr bool, filter []string) *Vendor {
 }
 
 func (v *Vendor) save() {
+	v.Sort()
+	v.Trim()
+
 	buf, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		fmt.Printf("error marshalling '%s': %s\n", v.filename, err)
@@ -93,4 +106,38 @@ func (v *Vendor) save() {
 	defer f.Close()
 
 	_, _ = f.Write(buf)
+}
+
+func (v *Vendor) Sort() {
+	if len(v.Packages) > 1 {
+		sort.SliceStable(v.Packages, func(a, b int) bool { return v.Packages[a].Path < v.Packages[b].Path })
+	}
+}
+
+func (v *Vendor) Trim() bool {
+	if len(v.Packages) < 2 {
+		return false
+	}
+
+	var newPkgs = make([]*Package, 0, len(v.Packages))
+	var lastPkg *Package = nil
+	for _, pkg := range v.Packages {
+		if lastPkg != nil {
+			if !strings.HasPrefix(pkg.Path, lastPkg.Path) {
+				newPkgs = append(newPkgs, pkg)
+				lastPkg = pkg
+			} else {
+				fmt.Printf("trim %s\n", pkg.Path)
+			}
+		} else {
+			newPkgs = append(newPkgs, pkg)
+			lastPkg = pkg
+		}
+	}
+	if len(v.Packages) != len(newPkgs) {
+		v.Packages = newPkgs
+		return true
+	}
+	//fmt.Printf("trimmed from %d to %d packages\n", len(v.Packages), len(newPkgs))
+	return false
 }
