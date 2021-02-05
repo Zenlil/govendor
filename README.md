@@ -4,16 +4,16 @@ Basic re-implementation of govendor
 ```
 $ govendor --help
 
-govendor 0.2.0
-Usage: govendor [--source SOURCE] [--filename VENDOR_JSON] [--gopath GOPATH] [--dryrun] <command> [<args>]
+govendor 0.3.0
+Usage: govendor [--filename VENDOR_JSON] [--gopath GOPATH] [--ignore IGNORE] [--dryrun] [--verbose] <command> [<args>]
 
 Options:
-  --source SOURCE, -s SOURCE
-                         source location of .go-files [default: .]
   --filename VENDOR_JSON, -f VENDOR_JSON
                          the name and location of the vendor.json file [default: vendor/vendor.json]
   --gopath GOPATH        the GOPATH location
+  --ignore IGNORE        ignore these packages prefixes
   --dryrun               perform a dry-run
+  --verbose, -v          show more information regarding operations
   --help, -h             display this help and exit
   --version              display version and exit
 
@@ -31,25 +31,67 @@ Commands:
 ## init
 Create the basic vendor.json in the vendor folder
 
-## list [packages]
-Lists the packages in the vendor.json file, along with git timestamps
+## Package operations
+The `list`, `add`, `delete`, `get` and `update` commands take a list of package-names
 
-## add [packages]
-Add packages to vendoring, does not copy any files
+Example:
+```
+$ govendor add github.com/alexflint/go-arg
+...
 
-## delete [packages]
-Delete packages from vendor.json and the vendor-folder
+$ govendor update github.com/dustin/go-humanize
+...
+```
 
-## get [packages]
-Adds missing packages to vendor.json and updates all selected packages
+## Dependency operations
+These operations are scanning the go-source to show (and perform add, update and delete operations)
 
-## update [packages]
-Copy the content of each package to the vendor folder.
+You can supply the name of multiple source-folders to allow them to share the same vendor-folder. (see example below)
 
-Does not download anything.
+The `deps` and `tidy` both scan the desired source-folders for their dependencies and present a list on what to do. The `tidy` also performs those actions.
 
-## deps
-Does a scan of the source to determine what packages are actually used
+Use the `--no-remove` argument on `tidy` to not remove unused packages
 
-## tidy
-Perform a scan (deps) and adds, updates or removes the neccesary packages
+## Example: multi-source-folders
+```
+.../go/src/mypackage
+           |-- main
+           |   |-- main.go
+           |   |-- ...
+           |
+           |-- logic
+           |   |-- a.go
+           |   |-- b.go
+           |   |-- ...
+           |
+           |-- vendor
+               |-- vendor.json
+               |-- ...(vendored packages)
+```
+
+To scan for dependencies in the following situation you can do (from the `mypackage` folder):
+```
+govendor deps *
+```
+this will then scan both the `main` and the `logic` folders for shared their dependencies.
+
+The `tidy *` command will also add, update or remove using the same principle.
+
+## Example: always-present side repo
+If you have a shared package thats always available during build that you're not interested in vendoring to each and every one of you other packages you can use the env-var `GOVENDOR_IGNORE`
+
+```
+...go/src
+      |-- mypackage
+      |   |---
+      |
+      |-- otherpackage
+      |   |---
+      |
+      |-- frameworkpkg
+          |---
+```
+
+Now, just set the `GOVENDOR_IGNORE=.,frameworkpkg` and any import from mypackage or otherpackage to anything inside 'frameworkpkg' will be ignored and not vendored.
+
+The '.' in the option will also ignore vendoring between packages sharing the same git-repo.
