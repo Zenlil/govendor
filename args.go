@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 
 	arg "github.com/alexflint/go-arg"
 	"golang.org/x/term"
@@ -20,19 +21,23 @@ type PackageArgs struct {
 }
 
 type DepsArgs struct {
-	Dump bool `arg:"--dump" help:"creates a 'deps.json' of relevant packages"`
+	SourceFolders []string `arg:"positional" placeholder:"SOURCE"`
+	Dump          bool     `arg:"--dump" help:"creates a 'deps.json' of relevant packages"`
 }
 
 type TidyArgs struct {
-	Dump     bool `arg:"--dump" help:"creates a 'deps.json' of relevant packages"`
-	NoRemove bool `arg:"--no-remove,--noremove" help:"dont remove any unused packages"`
+	SourceFolders []string `arg:"positional" placeholder:"SOURCE"`
+	Dump          bool     `arg:"--dump" help:"creates a 'deps.json' of relevant packages"`
+	NoRemove      bool     `arg:"--no-remove,--noremove" help:"dont remove any unused packages"`
 }
 
 type CmdArgs struct {
-	Source   string           `arg:"-s,--source" help:"source location of .go-files" default:"."`
+	// Source   string           `arg:"-s,--source" help:"source location of .go-files" default:"."`
 	Filename string           `arg:"-f,--filename" help:"the name and location of the vendor.json file" default:"vendor/vendor.json" placeholder:"VENDOR_JSON"`
 	GoPath   string           `arg:"env" help:"the GOPATH location" placeholder:"GOPATH"`
+	Ignore   []string         `arg:"env:GOVENDOR_IGNORE" help:"ignore these packages prefixes" placeholder:"IGNORE"`
 	DryRun   bool             `arg:"--dryrun" help:"perform a dry-run"`
+	Verbose  bool             `arg:"-v,--verbose" help:"show more information regarding operations"`
 	Init     *InitArgs        `arg:"subcommand:init" help:"initialized the vendor.json file"`
 	List     *PackageArgs     `arg:"subcommand:list" help:"list packages along with git timestamps"`
 	Add      *AddOrDeleteArgs `arg:"subcommand:add" help:"add one package(s) to vendoring"`
@@ -43,8 +48,12 @@ type CmdArgs struct {
 	Tidy     *TidyArgs        `arg:"subcommand:tidy" help:"add, update and removes according to 'deps'"`
 }
 
+var extras struct {
+	goSrc string
+}
+
 func (CmdArgs) Version() string {
-	return "govendor 0.2.1"
+	return "govendor 0.3.0"
 }
 
 var args CmdArgs
@@ -54,6 +63,8 @@ func init() {
 	if pa.Subcommand() == nil {
 		pa.Fail("missing command: init, list, add, delete, get, update")
 	}
+
+	extras.goSrc = fmt.Sprintf("%s%c", filepath.Join(args.GoPath, "src"), filepath.Separator)
 
 	w, h, err := term.GetSize(0)
 	if err != nil {

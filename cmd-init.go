@@ -17,7 +17,7 @@ func initVendor(name string) {
 	wd, _ := os.Getwd()
 	v = &Vendor{
 		Ignore:   "test",
-		RootPath: strings.TrimPrefix(wd, fmt.Sprintf("%s%c", filepath.Join(args.GoPath, "src"), filepath.Separator)),
+		RootPath: strings.TrimPrefix(wd, extras.goSrc),
 		filename: name,
 	}
 	if args.DryRun {
