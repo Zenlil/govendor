@@ -1,4 +1,4 @@
-module github.com/Zenlil/govendor
+module github.com/ninlil/govendor
 
 go 1.15
 
